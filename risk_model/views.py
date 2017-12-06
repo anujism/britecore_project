@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from models import RiskType, RiskField
+from django.shortcuts import render
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 from serializers import RiskTypeSerializer, RiskFieldSerializer
-from django.shortcuts import render
+from models import RiskType, RiskField
 
 
 def index(request):
@@ -16,6 +17,8 @@ class RiskTypeViewSet(viewsets.ModelViewSet):
     """
     queryset = RiskType.objects.all().prefetch_related('riskfield_set')
     serializer_class = RiskTypeSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('name',)
 
 
 class RiskFieldViewSet(viewsets.ModelViewSet):
