@@ -1,0 +1,105 @@
+{% load  static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Risk Type Forms</title>
+    <!-- Compiled and minified CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.7.1/css/bootstrap-datepicker.min.css">
+
+  <!-- Compiled and minified JavaScript -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.7.1/js/bootstrap-datepicker.min.js"></script>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.9/vue.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vue-resource/1.3.4/vue-resource.min.js"></script>
+</head>
+<body>
+<div id="app">
+  <div class="container">
+      <div class="row"><div class="col-md-12 text-center"><h4 class="center">Risk Type Forms</h4></div></div>
+
+      <div id="accordion" class="panel-group">
+        <div class="panel panel-default" v-for="(risk_type, rt_idx) in risk_types">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" :href="'#risk-type-panel'+rt_idx"><span class="glyphicon glyphicon-plus"></span> ${risk_type.name}</a>
+                </h4>
+            </div>
+            <div :id="'risk-type-panel'+rt_idx" class="panel-collapse collapse">
+                <div class="panel-body">
+                    <form>
+                      <div class="row form-group" v-for="(risk_field, index) in risk_type.riskfield_set">
+                        <div class="col-md-4"><label :for="risk_field.name">${risk_field.label}</label></div>
+                        <div class="col-md-8">
+                          <template v-if="risk_field.field_type==='t'">
+                            <input class="form-control" :placeholder="risk_field.default_value" :name="risk_field.name"
+                                   type="text" class="validate" key="risk_field.name">
+                          </template>
+                          <template v-else-if="risk_field.field_type==='i'">
+                            <input class="form-control" :placeholder="risk_field.default_value" :name="risk_field.name"
+                                   type="number" class="validate" key="risk_field.name">
+                          </template>
+                          <template v-else-if="risk_field.field_type==='b'">
+                            <input class="form-control" :placeholder="risk_field.default_value" :name="risk_field.name"
+                                   type="checkbox" class="validate" key="risk_field.name" :id="risk_field.name">
+                          </template>
+                          <template v-else-if="risk_field.field_type==='s'">
+                              <select class="form-control" :name="risk_field.name" key="risk_field.name">
+                                  <option :value="choice[0]" v-for="choice in risk_field.field_choices">${choice[1]}</option>
+                              </select>
+                          </template>
+                          <template v-else-if="risk_field.field_type==='d'">
+                            <input class="form-control" :placeholder="risk_field.default_value" :name="risk_field.name"
+                                   type="text" class="validate datepicker" data-provide="datepicker" key="risk_field.name">
+                          </template>
+                        </div>
+                      </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+      </div>
+  </div>
+</div>
+<script>
+{#    Vue.component('my-text-input', {#}
+{#      template: '<input :placeholder="risk_field.default_value" :name="risk_field.name"\#}
+{#                  :type="field_type" class="validate" key="risk_field.name">',#}
+{#      props: ['risk_field', 'field_type']#}
+{#    });#}
+    var app = new Vue({
+        delimiters: ['${', '}'],
+        el: '#app',
+        data: {
+            risk_types: [],
+            loading: true
+        },
+        http: {
+            root: 'http://localhost:8000/api/'
+        },
+        methods: {
+            getList: function () {
+                this.$http.get('risk-type/').then(function (data) {
+                    this.risk_types = data.body;
+                    this.loading = false;
+                })
+            }
+        },
+        mounted: function () {
+            this.getList();
+        }
+
+
+    });
+    // Toggle plus minus icon on show hide of collapse element
+    $("#app").on('show.bs.collapse', ".collapse", function(){
+        $(this).parent().find(".glyphicon").removeClass("glyphicon-plus").addClass("glyphicon-minus");
+    }).on('hide.bs.collapse', ".collapse", function(){
+        $(this).parent().find(".glyphicon").removeClass("glyphicon-minus").addClass("glyphicon-plus");
+    });
+</script>
+</body>
+</html>
